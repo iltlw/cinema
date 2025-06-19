@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <input type="button" value="添加行" @click="addRow">
+    <input type="button" value="添加座位" @click="addCol">
+    <input type="button" value="添加过道" @click="addAisle">
+    <table>
+        <tr v-for="(row,i) in seatInfo">
+            <td v-for="(col,j) in row">
+                <span v-if="col===0" @click="selSeat(j,i)">空座</span>
+                <span v-if="col===1">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span v-if="col===2">锁定</span>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                seatInfo: [],
+                nowRow: -1
+            }
+        },
+        methods: {
+            addRow() {//[[],[],[]]
+                this.nowRow++;
+                this.seatInfo.push([]);
+            },
+            addCol() {
+                this.seatInfo[this.nowRow].push(0);
+            },
+            addAisle() {
+                this.seatInfo[this.nowRow].push(1);
+            }
+        }
+    }).mount('#app');
+</script>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>订单详情</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        table, tr, td, th {
+            border: black solid 1px;
+            border-collapse: collapse;
+            width: 1000px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <th>订单编号</th>
+            <td>{{order.orderNum}}</td>
+        </tr>
+        <tr>
+            <th>电影名称</th>
+            <td>{{order.movieName}}</td>
+        </tr>
+        <tr>
+            <th>海报</th>
+            <td><img :src="order.movieImgUrl" width="150" alt="暂无海报"></td>
+        </tr>
+        <tr>
+            <th>开始时间</th>
+            <td>{{new Date(order.movieStartTime).toLocaleString()}}</td>
+        </tr>
+        <tr>
+            <th>时长</th>
+            <td>{{order.movieDuration}}分钟</td>
+        </tr>
+        <tr>
+            <th>结束时间</th>
+            <td>{{new Date(order.movieEndTime).toLocaleString()}}</td>
+        </tr>
+        <tr>
+            <th>影院</th>
+            <td>{{order.cinemaName}}</td>
+        </tr>
+        <tr>
+            <th>影厅</th>
+            <td>{{order.cinemaHallName}}</td>
+        </tr>
+        <tr>
+            <th>座位排</th>
+            <td>{{order.orderSeatRow + 1}}</td>
+        </tr>
+        <tr>
+            <th>座位列</th>
+            <td>{{order.orderSeatCol + 1}}</td>
+        </tr>
+        <tr>
+            <th>订单时间</th>
+            <td>{{new Date(order.orderTime).toLocaleString()}}</td>
+        </tr>
+        <tr>
+            <th>金额</th>
+            <td>{{order.orderAmount}}元</td>
+        </tr>
+        <tr>
+            <th>状态</th>
+            <td v-if="order.orderState===0">未支付</td>
+            <td v-if="order.orderState===1">已支付</td>
+            <td v-if="order.orderState===2">已退款</td>
+        </tr>
+        <tr>
+            <th>操作</th>
+            <td>
+                <input v-if="order.orderState===0" type="button" value="支付" @click="confirm('确定支付吗？') && pay()">&nbsp;
+                <input v-if="order.orderState===0" type="button" value="取消订单" @click="confirm('确定取消订单吗？') && deleteOrder()">
+                <input v-if="order.orderState===1" type="button" value="退款"
+                       @click="confirm('确定退款吗？') && refund()">&nbsp;
+                <input v-if="order.payId != null" type="button" value="支付信息"
+                       @click="toPayInfo(order.payId)">
+            </td>
+        </tr>
+    </table>
+    <!--    以下是原buy.html中的代码，可能包含支付逻辑，故保留-->
+    <!--    <div v-if="isPay">-->
+    <!--        <h2>请用微信支付</h2>-->
+    <!--        <div id="qrcode"></div>-->
+    <!--    </div>-->
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                order: {},
+                isPay: false
+            }
+        },
+        methods: {
+            toPayInfo(item) {
+                localStorage.setItem("payId", JSON.stringify(item));
+                window.location = "pay-info.html";
+            },
+            confirm(prompt) {
+                return window.confirm(prompt);
+            },
+            pay() {
+                this.isPay = true;
+                axios.post("/user/pay", {
+                    orderId: this.order.orderId
+                }, {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        // 以下是原buy.html中的代码，可能包含支付逻辑，故保留
+                        // let code_url = resp.data.data.code_url;
+                        // this.payId = resp.data.data.payId;
+                        // let qrcode = new QRCode(document.getElementById("qrcode"), {width: 200, height: 200});
+                        // qrcode.makeCode(code_url);
+                        // this.getPayState();
+                        // 模拟支付，实际在此处添加支付逻辑
+                        alert("支付成功！");
+                        window.location = "order-list.html";
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                })
+            },
+            refund() {
+                axios.post("/user/refund", {
+                    orderId: this.order.orderId
+                }, {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        // 模拟退款，实际在此处添加退款逻辑
+                        alert("退款成功！");
+                        window.location = "order-list.html";
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                })
+            },
+            deleteOrder() {
+                axios.post("/user/delete-order", {
+                    orderId: this.order.orderId
+                }, {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        alert("订单取消成功！");
+                        window.location = "order-list.html";
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                })
+            }
+        },
+        mounted() {
+            this.order = JSON.parse(localStorage.getItem("order"));
+        }
+    }).mount('#app');
+</script>

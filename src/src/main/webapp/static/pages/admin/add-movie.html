@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>添加电影</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <form @submit.prevent="submitFrom">
+        <label for="mname">电影名：</label>
+        <input type="text" id="mname" v-model="mname" required>
+        <label for="mtime">时长：</label>
+        <input type="number" id="mtime" v-model="mtime" required>
+        <label for="selfile">选择海报：</label>
+        <input type="file" id="selfile" @change="selfile" required>
+        <input type="submit" value="上传"><br>
+        <br/>
+    </form>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                mname: '',
+                mtime: '',
+                imgFile: ''
+            }
+        },
+        methods: {
+            selfile(event) {
+                this.imgFile = event.target.files[0];
+            },
+            submitFrom() {
+                // console.log(this.imgFile);
+                const formData = new FormData();
+                formData.append("movieName", this.mname);
+                formData.append("movieDuration", this.mtime);
+                formData.append("file", this.imgFile);
+                axios.post("/admin/add-movie", formData).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        alert("上传成功");
+                        window.location = "home.html";
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                });
+            }
+        }
+    }).mount('#app');
+</script>

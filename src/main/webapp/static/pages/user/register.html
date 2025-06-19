@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <form @submit.prevent="register" method="post">
+        <label for="userName">用户名：</label>
+        <input type="text" id="userName" v-model="userName">
+        <br/>
+        <label for="userPassword">密码：</label>
+        <input type="password" id="userPassword" v-model="userPassword">
+        <br/>
+        <label for="confirmUserPassword">确认密码：</label>
+        <input type="password" id="confirmUserPassword" v-model="confirmUserPassword">
+        <br/>
+        <input type="submit" value="注册">
+    </form>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                userName: '',
+                userPassword: '',
+                confirmUserPassword: ''
+            }
+        },
+        methods: {
+            register() {
+                if (this.userPassword !== '' && this.userPassword === this.confirmUserPassword) {
+                    axios({
+                        method: 'post',
+                        url: '/user/register',
+                        data: {
+                            userName: this.userName,
+                            userPassword: this.userPassword
+                        },
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    }).then((resp) => {
+                        // console.log(resp.data);
+                        if (resp.data.code === 200) {
+                            alert("注册成功");
+                            window.location = "login.html";
+                        } else {
+                            alert(resp.data.msg);
+                        }
+                    })
+                } else {
+                    alert("密码不一致");
+                }
+            }
+        }
+    }).mount('#app');
+</script>

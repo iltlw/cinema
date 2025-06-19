@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的订单</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        table, tr, td, th {
+            border: black solid 1px;
+            border-collapse: collapse;
+            width: 1000px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+    <div style="margin: auto;width: 1000px">
+        <table>
+            <tr>
+                <th>订单编号</th>
+                <th>电影名称</th>
+                <th>开始时间</th>
+                <th>时长</th>
+                <th>影院</th>
+                <th>影厅</th>
+                <th>座位排</th>
+                <th>座位列</th>
+                <th>金额</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+            <tr v-for="item in orderList">
+                <td>{{item.orderNum}}</td>
+                <td>{{item.movieName}}</td>
+                <td>{{new Date(item.movieStartTime).toLocaleString()}}</td>
+                <td>{{item.movieDuration}}分钟</td>
+                <td>{{item.cinemaName}}</td>
+                <td>{{item.cinemaHallName}}</td>
+                <td>{{item.orderSeatRow+1}}</td>
+                <td>{{item.orderSeatCol+1}}</td>
+                <td>{{item.orderAmount}}元</td>
+                <td v-if="item.orderState===0">未支付</td>
+                <td v-if="item.orderState===1">已支付</td>
+                <td v-if="item.orderState===2">已退款</td>
+                <td>
+                    <input v-if="item.orderState===0" type="button" value="查看详情/支付" @click="toOrderInfo(item)">
+                    <input v-if="item.orderState===1" type="button" value="查看详情/退款" @click="toOrderInfo(item)">
+                    <input v-if="item.orderState===2" type="button" value="查看详情" @click="toOrderInfo(item)">
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                orderList: [],
+                cinema: ''
+            }
+        },
+        methods: {
+            toOrderInfo(item) {
+                localStorage.setItem("order", JSON.stringify(item));
+                window.location = "order-info.html";
+            },
+            getOrderList() {
+                axios.post("/user/my-order")
+                    .then((resp) => {
+                        // console.log(resp.data);
+                        if (resp.data.code === 200) {
+                            this.orderList = resp.data.data;
+                        } else {
+                            alert(resp.data.msg);
+                        }
+                    })
+            }
+        },
+        mounted() {
+            this.getOrderList();
+        }
+    }).mount('#app');
+</script>

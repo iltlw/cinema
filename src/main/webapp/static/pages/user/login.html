@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <form id="form" @submit.prevent="login" method="post">
+        <label for="username">用户名：</label>
+        <input type="text" id="username" v-model="username">
+        <br/>
+        <label for="password">密码：</label>
+        <input type="password" id="password" v-model="password">
+        <br/>
+    </form>
+    <input type="submit" form="form" value="登录">&nbsp;&nbsp;
+    <a href="register.html">
+        <button>注册</button>
+    </a>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                username: '',
+                password: ''
+            }
+        },
+        methods: {
+            login() {
+                axios({
+                    method: 'post',
+                    url: '/user/login',
+                    data: {
+                        username: this.username,
+                        password: this.password
+                    },
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        alert("登录成功")
+                        window.location = "home.html";
+                    } else {
+                        alert(resp.data.msg)
+                    }
+                });
+            }
+        }
+    }).mount('#app');
+</script>

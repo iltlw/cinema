@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>订单详情</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        table, tr, td, th {
+            border: black solid 1px;
+            border-collapse: collapse;
+            width: 1000px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <th>支付记录编号</th>
+            <td>{{pay.payNum}}</td>
+        </tr>
+        <tr>
+            <th>支付时间</th>
+            <td>{{new Date(pay.payTime).toLocaleString()}}</td>
+        </tr>
+        <tr>
+            <th>退款信息</th>
+            <td>{{pay.payRefundInfo}}</td>
+        </tr>
+        <tr>
+            <th>通知信息</th>
+            <td>{{pay.payNotifyInfo}}</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                pay: {},
+                payId: ''
+            }
+        },
+        methods: {
+            getPayList() {
+                axios.post("/user/pay-info", {
+                    payId: localStorage.getItem("payId")
+                }, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then((resp) => {
+                        // console.log(resp.data);
+                        if (resp.data.code === 200) {
+                            this.pay = resp.data.data;
+                        } else {
+                            alert(resp.data.msg);
+                        }
+                    })
+            }
+        },
+        mounted() {
+            this.payId = JSON.parse(localStorage.getItem("payId"));
+            this.getPayList();
+        }
+    }).mount('#app');
+</script>

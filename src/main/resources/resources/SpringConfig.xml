@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <context:component-scan base-package="org.g220804"/>
+    <mvc:annotation-driven/>
+    <mvc:default-servlet-handler/>
+    <tx:annotation-driven/>
+    <context:property-placeholder location="classpath*:jdbc.properties"/>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean class="org.springframework.web.multipart.support.StandardServletMultipartResolver" id="multipartResolver"/>
+
+    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+        <property name="configLocation" value="classpath:mybatisConfig.xml"/>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="org.g220804.mapper"/>
+    </bean>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**"/>
+            <mvc:exclude-mapping path="/admin/login"/>
+            <bean class="org.g220804.handlers.AdminSessionHandler"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/cinema/**"/>
+            <mvc:exclude-mapping path="/cinema/login"/>
+            <bean class="org.g220804.handlers.CinemaSessionHandler"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/user/**"/>
+            <mvc:exclude-mapping path="/user/login"/>
+            <mvc:exclude-mapping path="/user/register"/>
+            <mvc:exclude-mapping path="/user/movie-list"/>
+            <mvc:exclude-mapping path="/user/arrange-list"/>
+            <mvc:exclude-mapping path="/user/notify_url"/>
+            <bean class="org.g220804.handlers.UserSessionHandler"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    <bean class="org.g220804.configs.MyConfig" id="myConfig"/>
+    <bean class="com.github.wxpay.sdk.WXPay" id="wxPay">
+        <constructor-arg name="config" ref="myConfig"/>
+    </bean>
+</beans>

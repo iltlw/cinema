@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>添加影厅</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <form @submit.prevent="submitFrom">
+        <label for="cname">影厅名：</label>
+        <input type="text" id="cname" v-model="cname" required><br/>
+        <h3>座位布局</h3>
+        <input type="button" value="添加一排" @click="addRow">&nbsp;
+        <input type="button" value="添加座位" @click="addCol">&nbsp;
+        <input type="button" value="添加过道" @click="addAisle">&nbsp;
+        <input type="button" value="撤销" @click="del">
+        <table>
+            <tr v-for="(row,i) in seatInfo">
+                <td v-for="(col,j) in row">
+                    <span v-if="col===0" @click="selSeat(j,i)"><img src="../../img/微信图片_20240127150302.png" alt="可选"></span>
+                    <span v-if="col===1"><img src="../../img/微信图片_20240127150236.png" alt="过道"></span>
+                    <span v-if="col===2"><img src="../../img/微信图片_20240127150255.png" alt="已售"></span>
+                </td>
+            </tr>
+        </table>
+        <br/>
+        <input type="submit" value="添加"><br>
+        <br>
+    </form>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                cname: '',
+                caddress: '',
+                seatInfo: [],
+                nowRow: -1
+            }
+        },
+        methods: {
+            del() {
+                let len = this.seatInfo[this.nowRow].length;
+                if (len === 0) {
+                    this.seatInfo.splice(this.seatInfo.length - 1, 1);
+                    this.nowRow--;
+                    len = this.seatInfo[this.nowRow].length;
+                }
+                this.seatInfo[this.nowRow].splice(len - 1, 1);
+            },
+            addRow() {//[[],[],[]]
+                this.nowRow++;
+                this.seatInfo.push([]);
+            },
+            addCol() {
+                this.seatInfo[this.nowRow].push(0);
+            },
+            addAisle() {
+                this.seatInfo[this.nowRow].push(1);
+            },
+            submitFrom() {
+                // console.log(this.imgFile);
+                const formData = new FormData();
+                formData.append("cinemaHallName", this.cname);
+                formData.append("cinemaHallSeat", JSON.stringify(this.seatInfo));
+                axios.post("/cinema/add-hall", formData).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        alert("添加成功");
+                        window.location = "home.html";
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                });
+            }
+        }
+    }).mount('#app');
+</script>
