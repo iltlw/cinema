@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>影厅列表</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        table, tr, td, th {
+            margin: auto;
+            border: black solid 1px;
+            border-collapse: collapse;
+            width: 1000px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+    <table style="text-align:center;border-collapse: collapse;border: black solid 1px;width: 1000px;margin: auto">
+        <tr>
+            <th>影厅名</th>
+            <th>座位信息</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        <tr v-for="item in hallList">
+            <td>{{item.cinemaHallName}}</td>
+            <td>
+                <table style="width: 100%">
+                    <tr v-for="(row,i) in JSON.parse(item.cinemaHallSeat)">
+                        <td v-for="(col,j) in row">
+                            <span v-if="col===0"><img src="../../img/微信图片_20240127150302.png" width="21"
+                                                      alt="可选"></span>
+                            <span v-if="col===1"><img src="../../img/微信图片_20240127150236.png" width="21"
+                                                      alt="已选"></span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td>{{ item.cinemaHallState===true ? '正常' : '停用' }}</td>
+            <td><input style="display: inline-block" v-if="item.cinemaHallState===false" type="button" value="启用"
+                       @click="changeCinemaHall(item.cinemaHallId,1)">
+                <input style="display: inline-block" v-if="item.cinemaHallState===true" type="button" value="停用"
+                       @click="changeCinemaHall(item.cinemaHallId,0)">
+                <br/>
+                <input style="display: inline-block" type="button" value="删除"
+                       @click="confirm('确定删除此影厅吗？') && deleteCinemaHall(item.cinemaHallId)">
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                hallList: []
+            }
+        },
+        methods: {
+            confirm(prompt) {
+                return window.confirm(prompt);
+            },
+            getCinemaList() {
+                axios.post("/cinema/hall-list").then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        this.hallList = resp.data.data;
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                })
+            },
+            changeCinemaHall(cid, state) {
+                axios.post("/cinema/change-hall-state", {
+                    cinemaHallId: cid,
+                    state: state
+                }, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        this.getCinemaList();
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                })
+            },
+            deleteCinemaHall(cid) {
+                axios.post("/cinema/delete-hall", {
+                    cinemaHallId: cid,
+                }, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        this.getCinemaList();
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                })
+            }
+        },
+        mounted() {
+            this.getCinemaList();
+        }
+    }).mount('#app');
+</script>

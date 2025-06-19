@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>添加影院</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <form @submit.prevent="submitFrom">
+        <label for="selMovieId">电影：</label>
+        <select id="selMovieId" v-model="selMovieId">
+            <option value="0">---请选择---</option>
+            <option v-for="item in movieList" :value="item.movieId">
+                {{item.movieName}}
+            </option>
+        </select>
+        <br/>
+        <label for="selHallId">影厅：</label>
+        <select id="selHallId" v-model="selHallId">
+            <option value="0">---请选择---</option>
+            <option v-for="item in hallList" :value="item.cinemaHallId">
+                {{item.cinemaHallName}}
+            </option>
+        </select>
+        <br/>
+        <label for="startTime">开始时间：</label>
+        <input type="datetime-local" id="startTime" v-model="startTime" required>
+        <br/>
+        <label for="price">价格（元）：</label>
+        <input type="number" id="price" v-model="price" required>
+        <br/>
+        <input type="submit" value="创建">
+    </form>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                selMovieId: 0,
+                selHallId: 0,
+                movieList: [],
+                hallList: [],
+                startTime: '',
+                price: ''
+            }
+        },
+        methods: {
+            getMovieList() {
+                axios.post("/cinema/movie-list").then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        this.movieList = resp.data.data;
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                })
+            },
+            getHallList() {
+                axios.post("/cinema/hall-list").then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        this.hallList = resp.data.data;
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                })
+            },
+            selfile(event) {
+                this.imgFile = event.target.files[0];
+            },
+            submitFrom() {
+                // console.log(this.imgFile);
+                const formData = new FormData();
+                formData.append("arrangeCinemaHallId", this.selHallId);
+                formData.append("arrangeMovieId", this.selMovieId);
+                formData.append("arrangeMovieStartTime", this.startTime);
+                formData.append("arrangePrice", this.price);
+                axios.post("/cinema/add-arrange", formData).then((resp) => {
+                    // console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        alert("添加成功");
+                        window.location = "home.html";
+                    } else {
+                        alert(resp.data.msg);
+                    }
+                });
+            }
+        },
+        mounted() {
+            this.getMovieList();
+            this.getHallList();
+        }
+    }).mount('#app');
+</script>

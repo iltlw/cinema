@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>管理后台</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <td><input type="button" value="影厅列表" @click="toHallList"></td>
+            <td><input type="button" value="添加影厅" @click="toAddHall"></td>
+        </tr>
+        <tr>
+            <td><input type="button" value="排片列表" @click="toArrangeList"></td>
+            <td><input type="button" value="添加排片" @click="toAddArrange"></td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    const {createApp} = Vue;
+    createApp({
+        data() {
+            return {
+                username: '',
+                password: ''
+            }
+        },
+        methods: {
+            toAddHall() {
+                window.location = "add-hall.html";
+            },
+            toHallList() {
+                window.location = "hall-list.html";
+            },
+            toAddArrange() {
+                window.location = "add-arrange.html";
+            },
+            toArrangeList() {
+                window.location = "arrange-list.html";
+            }
+        }
+    }).mount('#app');
+</script>
